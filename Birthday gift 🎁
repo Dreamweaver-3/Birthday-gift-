@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Bestie! 🎉</title>
+
+  <!-- Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #fff0f3;
+      --card-bg: #ffffff;
+      --primary-color: #ff6b81;
+      --accent-color: #ff85a1;
+      --text-color: #4a4a4a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Screen Management (Expanded for Tablet Screens) */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 95%;
+      max-width: 760px; /* Scaled up for Tablet */
+      padding: 25px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Common Typography & Buttons (Enlarged) */
+    h1 {
+      color: var(--primary-color);
+      font-size: 2.4rem;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    h3 {
+      color: var(--primary-color);
+      font-size: 1.6rem;
+      margin-bottom: 15px;
+    }
+
+    p {
+      line-height: 1.7;
+      margin-bottom: 16px;
+      font-size: 1.15rem; /* Larger readable text */
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      font-size: 1.15rem;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(255, 107, 129, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px) scale(1.04);
+      background-color: var(--accent-color);
+    }
+
+    button.secondary-btn {
+      background-color: #a4b0be;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Screen 1: Cake (Larger Cake) */
+    .cake-wrapper {
+      position: relative;
+      cursor: pointer;
+      margin: 30px 0;
+    }
+
+    .cake-img {
+      width: 300px; /* Increased from 220px */
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .cake-img.cut {
+      transform: scaleX(0.92) rotate(-6deg);
+      filter: drop-shadow(0 12px 20px rgba(0,0,0,0.15));
+    }
+
+    .cake-hint {
+      font-size: 1.05rem;
+      color: #888;
+      margin-top: -10px;
+    }
+
+    /* Screen 2: Choice & Angry Sticker */
+    .angry-container {
+      display: none;
+      margin-top: 25px;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .angry-sticker {
+      width: 170px; /* Increased from 120px */
+      height: auto;
+      margin-bottom: 12px;
+    }
+
+    .shake {
+      animation: shakeAnim 0.5s ease-in-out;
+    }
+
+    /* Screen 3: Flipbook Container (Tablet Optimized) */
+    .book-container {
+      width: 100%;
+      height: 690px; /* Increased height for larger viewports */
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      border: 4px solid #ffe3e8;
+    }
+
+    /* 3D Flip Viewport */
+    .pages-viewport {
+      position: relative;
+      width: 100%;
+      height: 560px; /* Expanded Viewport height */
+      perspective: 1400px;
+    }
+
+    .book-page {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 15px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow-y: auto;
+      text-align: center;
+      backface-visibility: hidden;
+      transform-origin: left center;
+      will-change: transform, opacity;
+    }
+
+    .book-page.active-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transform: rotateY(0deg);
+      opacity: 1;
+      z-index: 2;
+    }
+
+    .book-page h3 {
+      text-align: center;
+      border-bottom: 2px dashed #ffe3e8;
+      padding-bottom: 12px;
+      width: 100%;
+    }
+
+    /* Scattered Floating Images (Bigger Images & Adjustments) */
+    .journey-wrapper {
+      position: absolute;
+      width: 500px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 50px 40px;
+    }
+
+    .journey-text {
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(255, 107, 129, 0.15);
+      border: 1px solid #ffe3e8;
+      max-width: 82%;
+      font-size: 1.15rem;
+    }
+
+    .scattered-img {
+      position: absolute;
+      width: 180px; /* Increased from 75px */
+      height: 180px; /* Increased from 75px */
+      object-fit: cover;
+      border-radius: 10px;
+      border: 3px solid white;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      z-index: 1;
+      animation: floatMotion 3.5s ease-in-out infinite alternate;
+    }
+
+    /* Scattered Positions tailored for larger tablet display */
+    .img-pos-1 { top: -10px; left: -20px; transform: rotate(-10deg); animation-delay: 0s; }
+    .img-pos-2 { top: 10px; right: 10px; transform: rotate(12deg); animation-delay: 0.7s; }
+    .img-pos-3 { bottom: 10px; left: 15px; transform: rotate(8deg); animation-delay: 1.2s; }
+    .img-pos-4 { bottom: 5px; right: 15px; transform: rotate(-14deg); animation-delay: 1.8s; }
+
+    /* Canva Collage Image Styling (Significantly Enlarged) */
+    .canva-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .canva-img {
+      width: 100%;
+      max-height: 430px; /* Increased from 320px */
+      object-fit: contain;
+      border-radius: 16px;
+      border: 3px dashed #ff85a1;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    /* Letter styling for high readability */
+    .letter-body {
+      padding: 20px 25px;
+      text-align: left;
+      font-size: 1.25rem;
+      line-height: 1.8;
+    }
+
+    /* Motion Keyframes */
+    @keyframes floatMotion {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-12px); }
+    }
+
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 2px solid #f8f8f8;
+      width: 100%;
+      z-index: 10;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shakeAnim {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hidden Audio Element -->
+  <audio id="birthday-song" src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Happy_Birthday_to_You_instrumental.ogg" preload="auto"></audio>
+
+  <!-- SCREEN 1: CAKE CUTTING -->
+  <div id="screen-cake" class="screen active">
+    <h1>Happy Birthday! 🎂</h1>
+    <p>Tap the cake to cut it and start the celebration!</p>
+    
+    <div class="cake-wrapper" id="cake-wrapper" onclick="handleCakeCut()">
+      <img id="cake-img" class="cake-img" src="https://img.icons8.com/emoji/512/birthday-cake-emoji.png" alt="Birthday Cake">
+    </div>
+    <p class="cake-hint" id="cake-hint">👇 Tap the cake above</p>
+
+    <div id="cake-success" style="display: none; margin-top: 15px;">
+      <p style="color: var(--primary-color); font-weight: bold; font-size: 1.25rem; margin-bottom: 15px;">Yum! Music & Confetti time! 🎵✨🎉</p>
+      <button onclick="goToScreen('screen-choice')">Next ➔</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: THE CHOICE -->
+  <div id="screen-choice" class="screen">
+    <h2>Do you want to see your gift? 🎁</h2>
+    <p>Think carefully before answering...</p>
+    
+    <div class="btn-group">
+      <button onclick="goToScreen('screen-book')">YES! 💕</button>
+      <button class="secondary-btn" onclick="triggerAngryState()">No 😜</button>
+    </div>
+
+    <div id="angry-box" class="angry-container">
+      <img class="angry-sticker" src="https://i.ibb.co/1YVMZxmZ/396557953357cea53c743bb823061f13.jpg" alt="Angry Sticker">
+      <p style="color: #ff4757; font-weight: bold; font-size: 1.25rem;">Hey! How Dare You Say NO! Press YES! 😤</p>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: MEMORY BOOK, LETTERS & CANVA GALLERY -->
+  <div id="screen-book" class="screen">
+    <div class="book-container">
+      
+      <!-- 3D Viewport wrapper -->
+      <div class="pages-viewport">
+        
+        <!-- JOURNEY PAGE 1 -->
+        <div class="journey-text">
+          <h3>Our Journey - Chapter 1 🌸</h3>
+          <div class="journey-wrapper">
+            <img class="scattered-img img-pos-1" src="https://i.ibb.co/QvZS7zyQ/IMG-20250815-WA0027.jpg" alt="Memory 1">
+            <img class="scattered-img img-pos-2" src="https://i.ibb.co/ZzzsyYHF/IMG-20250815-WA0031.jpg" alt="Memory 2">
+            <img class="scattered-img img-pos-3" src="https://i.ibb.co/yFh7t46x/IMG-20260126-WA0030.jpg" alt="Memory 3">
+            <img class="scattered-img img-pos-4" src="https://i.ibb.co/S4pkDS1s/IMG-20260126-WA0011.jpg" alt="Memory 4">
+            
+            <div class="journey-text">
+              <p style="font-size: 1.3rem; margin-bottom: 8px;"><strong>How It All Began ✨</strong></p>
+              <p>**Before We Ever Spoke**<br> Neither of us knew we were meeting someone who would become such an irreplaceable part of our life.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOURNEY PAGE 2 -->
+        <div class="book-page">
+          <h3>Our Journey - Chapter 2 📸</h3>
+          <div class="journey-wrapper">
+            <img class="scattered-img img-pos-1" src="https://i.ibb.co/HT1FSkwz/IMG-20260816-WA0017.jpg" alt="Memory 5">
+            <img class="scattered-img img-pos-2" src="https://i.ibb.co/zTLpDsRN/IMG-20260816-161318.jpg" alt="Memory 6">
+            <img class="scattered-img img-pos-3" src="https://i.ibb.co/5hf67d0H/IMG-20260816-161403.jpg" alt="Memory 7">
+            <img class="scattered-img img-pos-4" src="https://i.ibb.co/nsCtHQcy/IMG-20260816-161539.jpg" alt="Memory 8">
+            
+            <div class="journey-text">
+              <p style="font-size: 1.3rem; margin-bottom: 8px;"><strong>Unforgettable Memories 🌈</strong></p>
+              <p>From crazy adventures to random photo sessions, every picture tells a story of endless laughter and core memories!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOURNEY PAGE 3 -->
+        <div class="book-page">
+          <h3>Our Journey - Chapter 3 ☕</h3>
+          <div class="journey-wrapper">
+            <img class="scattered-img img-pos-1" src="https://i.ibb.co/1tyKMnGp/IMG-20260126-WA0024.jpg" alt="Memory 9">
+            <img class="scattered-img img-pos-2" src="https://i.ibb.co/20mfFqty/IMG-20260126-WA0023.jpg" alt="Memory 10">
+            <img class="scattered-img img-pos-3" src="https://i.ibb.co/DD6PFcmS/IMG-20260126-WA0036.jpg" alt="Memory 11">
+            <img class="scattered-img img-pos-4" src="https://i.ibb.co/3yhNVm8r/IMG-20260816-113927.jpg" alt="Memory 12">
+            
+            <div class="journey-text">
+              <p style="font-size: 1.3rem; margin-bottom: 8px;"><strong>Late Night Rants 🌙</strong></p>
+              <p>The 2 AM conversations, endless gossip, sharing secrets, and always having each other's back through thick and thin.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOURNEY PAGE 4 -->
+        <div class="book-page">
+          <h3>Our Journey - Chapter 4 💪</h3>
+          <div class="journey-wrapper">
+            <img class="scattered-img img-pos-1" src="https://i.ibb.co/v6t7Pr0s/IMG-20260816-114323.jpg" alt="Memory 13">
+            <img class="scattered-img img-pos-2" src="https://i.ibb.co/FLk4Vw21/IMG-20260816-114354.jpg" alt="Memory 14">
+            <img class="scattered-img img-pos-3" src="https://i.ibb.co/wZftJ9Bx/IMG-20260816-114428.jpg" alt="Memory 15">
+            <img class="scattered-img img-pos-4" src="https://i.ibb.co/Z1gcfjJ6/IMG-20260816-114616.jpg" alt="Memory 16">
+            
+            <div class="journey-text">
+              <p style="font-size: 1.3rem; margin-bottom: 8px;"><strong>Growing Together 🌱</strong></p>
+              <p>We've celebrated each other's biggest wins and lifted each other up through tough days. Growing up together has been the best part!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOURNEY PAGE 5 -->
+        <div class="book-page">
+          <h3>Our Journey - Chapter 5 ⭐</h3>
+          <div class="journey-wrapper">
+            <img class="scattered-img img-pos-1" src="https://i.ibb.co/TD2PRHcL/IMG-20260816-115150.jpg" alt="Memory 17">
+            <img class="scattered-img img-pos-2" src="https://i.ibb.co/cXCcyHz5/IMG-20260816-115053.jpg" alt="Memory 18">
+            <img class="scattered-img img-pos-3" src="https://i.ibb.co/qF2ctJMf/IMG-20260816-145320.jpg" alt="Memory 19">
+            <img class="scattered-img img-pos-4" src="https://i.ibb.co/VpL1CYNv/IMG-20260816-145338.jpg" alt="Memory 20">
+            
+            <div class="journey-text">
+              <p style="font-size: 1.3rem; margin-bottom: 8px;"><strong>To Many More Years 💖</strong></p>
+              <p>Those inside jokes, delicious meals, and making unforgettable memories together!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- LETTER PAGE 1 -->
+        <div class="book-page">
+          <h3>Letter - Part 1 ✉️</h3>
+          <div class="letter-body">
+            <p>Dear Bestie,</p>
+            <p>First of all, a huge HAPPY BIRTHDAY! 🎉</p>
+            <p>**I wanted to create something truly special for you today because you deserve nothing less than the absolute best.</p>Back then, I never imagined a day where I'd prepare a birthday gift for you. We shared the same class from the start, but I couldn't stand you in your group. I disliked your personality from afar—unaware of how my world was about to change.</p>I want to write more in this letter but, this page can't hold it any longer😅.</p>
+          </div>
+        </div>
+
+        <!-- LETTER PAGE 2 -->
+        <div class="book-page">
+          <h3>Letter - Part 2 ✉️</h3>
+          <div class="letter-body">
+            <p>*Chapter 2: When We First Met*
+It all started when our teacher randomly rearranged the seating chart and placed us together. Honestly, I had no big expectations—you already had a best friend back then, so I kept my distance and never intended to come between you two. But as the days turned into months, sitting side by side slowly broke down all our walls. We started sharing quiet laughs, helping each other with class concepts, and getting comfortable in a way I never saw coming. By the time Class 8 ended and Class 9 began, so many things around us had shifted, but our bond only grew stronger.
+Looking back, if your former best friend Aarti hadn't grown distant from you, I often wonder—would we have ever become this close? I don't know if how things unfolded was good or bad for you, but selfishly, for me, it was the absolute best thing that could have ever happened.</p>
+          </div>
+        </div>
+
+        <!-- LETTER PAGE 3 -->
+        <div class="book-page">
+          <h3>Letter - Part 3 ✉️</h3>
+          <div class="letter-body">
+            <p>Looking ahead,I hope we stay by each other’s side through everything! I know I’m not perfect-I can be short-tempered and flawed, and sometimes I honestly wonder if I truly deserve a friend like you.🥺 But even on my worst days, I promise to keep trying my best to be the friend you deserve. Thank you for choosing me every single day! Thank you for being the one person I can always count on without hesitation! Your warmth and strength make my world so much brighter. Never forget how incredible you are—you can achieve every single dream you set your heart on,and I’ll forever be in your corner cheering you on! 🎉✨</p> HAPPY BIRTHDAY!🥳💕</p>May this new year of your life bring you endless happiness, exciting opportunities, and all the success in the world.</p> 
+            <p style="text-align: right; font-weight: bold; margin-top: 25px; color: var(--primary-color); font-size: 1.35rem;">Forever Your Bestie ❤️</p>
+          </div>
+        </div>
+
+        <!-- CANVA COLLAGE PAGE 1 -->
+        <div class="book-page">
+          <h3>Photo Gallery - Collage 1 🎨</h3>
+          <div class="canva-wrapper">
+            <img class="canva-img" src="https://i.ibb.co/N6HkCHwN/Playful-Friends-Collage-Photo-Collage-20260816-121246-0000.png">
+          </div>
+          <p style="margin-top: 12px; font-size: 1.05rem; color: #666;">Special Moments 💖</p>
+        </div>
+
+        <!-- CANVA COLLAGE PAGE 2 -->
+        <div class="book-page">
+          <h3>Photo Gallery - Collage 2 🎨</h3>
+          <div class="canva-wrapper">
+            <img class="canva-img" src="https://i.ibb.co/gFQB1cCk/Brown-and-Green-Illustrated-Friendship-Photo-Collage-20260126-135546-0000.png" alt="Canva Collage 2">
+          </div>
+          <p style="margin-top: 12px; font-size: 1.05rem; color: #666;">Favorite Snaps 📸</p>
+        </div>
+
+        <!-- CANVA COLLAGE PAGE 3 -->
+        <div class="book-page">
+          <h3>Photo Gallery - Collage 3 🎨</h3>
+          <div class="canva-wrapper">
+            <img class="canva-img" src="https://i.ibb.co/1Jw8Xrkq/Simple-Fun-Polaroid-Friendship-Photo-Collage-20250815-135754-0000.png" alt="Canva Collage 3">
+          </div>
+          <p style="margin-top: 12px; font-size: 1.05rem; color: #666;">Good Times & Smiles ✨</p>
+        </div>
+
+        <!-- CANVA COLLAGE PAGE 4 -->
+        <div class="book-page">
+          <h3>Photo Gallery - Collage 4 🎨</h3>
+          <div class="canva-wrapper">
+            <img class="canva-img" src="https://i.ibb.co/35q3WqL2/Illustrated-Picnic-Collage-Photo-Book-Photo-Collage-20260816-150319-0000.png" alt="Canva Collage 4">
+          </div>
+          <p style="margin-top: 12px; font-size: 1.05rem; color: #666;">rEAL DIVA!!</p>
+        </div>
+
+        <!-- CANVA COLLAGE PAGE 5 -->
+        <div class="book-page">
+          <h3>Photo Gallery - Collage 5 🎨</h3>
+          <div class="canva-wrapper">
+            <img class="canva-img" src="https://i.ibb.co/0jDMt4dB/Brown-and-White-Playful-Birthday-Poster-20260816-161007-0000.png" alt="Canva Collage 5">
+          </div>
+          <p style="margin-top: 12px; font-size: 1.05rem; color: #666;"> UNIVERSAL BEAUTY!</p>
+        </div>
+
+      </div>
+
+      <!-- Book Controls (Enlarged for Easy Tapping) -->
+      <div class="nav-footer">
+        <button class="secondary-btn" style="padding: 12px 24px; font-size: 1.05rem;" onclick="prevBookPage()">◀ Back</button>
+        <span id="page-indicator" style="font-size: 1.05rem; font-weight: bold; color: #666;">Page 1 of 13</span>
+        <button style="padding: 12px 24px; font-size: 1.05rem;" onclick="nextBookPage()">Next ▶</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Screen Navigation
+    function goToScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // Cake Cutting Logic
+    let cak
