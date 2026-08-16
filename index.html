@@ -6,7 +6,7 @@
   <title>Happy Birthday Bestie! 🎉</title>
 
   <!-- Confetti Library -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/canvas-confetti@1.5.1/dist/confetti.browser.js"></script>
 
   <style>
     :root {
@@ -521,4 +521,118 @@ Looking back, if your former best friend Aarti hadn't grown distant from you, I 
     }
 
     // Cake Cutting Logic
-    let cak
+    let cakeCut = false;
+    function handleCakeCut() {
+      if (cakeCut) return;
+      cakeCut = true;
+
+      const cakeImg = document.getElementById('cake-img');
+      cakeImg.classList.add('cut');
+      
+      document.getElementById('cake-hint').style.display = 'none';
+      document.getElementById('cake-success').style.display = 'block';
+
+      // Play Audio
+      const song = document.getElementById('birthday-song');
+      song.play().catch(err => console.log("Audio play blocked:", err));
+
+      // Trigger Confetti
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 90,
+          origin: { y: 0.6 }
+        });
+
+        const duration = 2.5 * 1000;
+        const animationEnd = Date.now() + duration;
+
+        const interval = setInterval(function() {
+          const timeLeft = animationEnd - Date.now();
+          if (timeLeft <= 0) return clearInterval(interval);
+          const particleCount = 50 * (timeLeft / duration);
+          confetti({ particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+          confetti({ particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
+      }
+    }
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    // Choice Screen Logic
+    function triggerAngryState() {
+      const angryBox = document.getElementById('angry-box');
+      angryBox.style.display = 'flex';
+      angryBox.classList.remove('shake');
+      void angryBox.offsetWidth; // Reset animation
+      angryBox.classList.add('shake');
+    }
+
+    // 3D Flipbook Logic
+    let currentPageIndex = 0;
+    let isFlipping = false;
+    const pages = document.querySelectorAll('.book-page');
+    const pageIndicator = document.getElementById('page-indicator');
+
+    function flipToPage(targetIndex, direction) {
+      if (isFlipping || targetIndex === currentPageIndex) return;
+      isFlipping = true;
+
+      const fromPage = pages[currentPageIndex];
+      const toPage = pages[targetIndex];
+
+      // Prepare target page in 3D position
+      toPage.style.display = 'flex';
+      toPage.style.transition = 'none';
+      toPage.style.transform = direction === 'next' ? 'rotateY(90deg)' : 'rotateY(-90deg)';
+      toPage.style.opacity = '0';
+
+      // Force Reflow
+      void toPage.offsetWidth;
+
+      // Enable CSS Transition
+      fromPage.style.transition = 'transform 0.55s ease-in-out, opacity 0.55s ease-in-out';
+      toPage.style.transition = 'transform 0.55s ease-in-out, opacity 0.55s ease-in-out';
+
+      // Perform 3D Flip Animation
+      fromPage.style.transform = direction === 'next' ? 'rotateY(-90deg)' : 'rotateY(90deg)';
+      fromPage.style.opacity = '0';
+
+      toPage.style.transform = 'rotateY(0deg)';
+      toPage.style.opacity = '1';
+
+      setTimeout(() => {
+        fromPage.classList.remove('active-page');
+        fromPage.style.display = 'none';
+        toPage.classList.add('active-page');
+        currentPageIndex = targetIndex;
+        updatePageIndicator();
+        isFlipping = false;
+      }, 550);
+    }
+
+    function nextBookPage() {
+      if (currentPageIndex < pages.length - 1) {
+        flipToPage(currentPageIndex + 1, 'next');
+      }
+    }
+
+    function prevBookPage() {
+      if (currentPageIndex > 0) {
+        flipToPage(currentPageIndex - 1, 'prev');
+      }
+    }
+
+    function updatePageIndicator() {
+      if (pageIndicator) {
+        pageIndicator.textContent = `Page ${currentPageIndex + 1} of ${pages.length}`;
+      }
+    }
+
+    // Initial Indicator Setup
+    updatePageIndicator();
+  </script>
+</body>
+</html>
